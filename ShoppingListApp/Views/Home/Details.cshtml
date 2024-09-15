@@ -1,0 +1,93 @@
+﻿@model ShoppingListApp.Data.ShoppingListItem
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Szczegóły listy</title>
+    <style>
+        .crossed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <h2>Szczegóły listy: @Model.ListName</h2>
+    <p>Data zakupów: @Model.ShoppingDate.ToString("dd.MM.yyyy HH:mm:ss")</p>
+
+    <h3>Produkty</h3>
+    <ul id="product-list">
+        @foreach (var product in Model.Products)
+        {
+            <li id="product-@product.Id" class="@(product.IsChecked ? "crossed" : "")">
+                @product.ProductName
+                <button onclick="toggleStatus(@product.Id)">Skreśl z listy</button>
+                <button onclick="deleteProduct(@product.Id)">Usuń</button>
+            </li>
+        }
+    </ul>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <h3>Dodaj nowy produkt</h3>
+    <input type="text" id="new-product-name" placeholder="Nazwa produktu" />
+    <button onclick="addProduct(@Model.Id)">Dodaj produkt</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleStatus(productId) {
+            $.ajax({
+                url: '@Url.Action("ToggleStatus", "Home")',
+                type: 'POST',
+                data: { id: productId },
+                success: function (response) {
+                    $('#product-' + productId).toggleClass('crossed');
+                },
+                error: function () {
+                    console.log("Wystąpił błąd podczas zmiany statusu produktu.");
+                }
+            });
+        }
+
+        function deleteProduct(productId) {
+            $.ajax({
+                url: '@Url.Action("DeleteProduct", "Home")',
+                type: 'POST',
+                data: { id: productId },
+                success: function (response) {
+                    $('#product-' + productId).remove();
+                },
+                error: function () {
+                    console.log("Wystąpił błąd podczas usuwania produktu.");
+                }
+            });
+        }
+
+        function addProduct(listId) {
+            var productName = $('#new-product-name').val();
+            if (!productName) {
+                alert("Nazwa produktu nie może być pusta.");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("AddProduct", "Home")',
+                type: 'POST',
+                data: { name: productName, listId: listId },
+                success: function (newProduct) {
+                    $('#product-list').append(
+                        '<li id="product-' + newProduct.Id + '" class="' + (newProduct.IsChecked ? 'crossed' : '') + '">' + newProduct.ProductName +
+                        ' <button onclick="toggleStatus(' + newProduct.Id + ')">Zmień status</button>' +
+                        ' <button onclick="deleteProduct(' + newProduct.Id + ')">Usuń</button>' +
+                        '</li>'
+                    );
+                    $('#new-product-name').val(''); 
+                },
+                error: function () {
+                    console.log("Wystąpił błąd podczas dodawania produktu.");
+                }
+            });
+        }
+    </script>
+
+    <a href="@Url.Action("Index", "Home")">Powrót do list</a>
+</body>
+</html>
+
+

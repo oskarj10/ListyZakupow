@@ -1,0 +1,103 @@
+﻿@model List<ShoppingListApp.Data.ShoppingListItem>
+
+@{
+    ViewData["Title"] = "Listy zakupów";
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <form action="/Home/Create" method="get">
+        <button type="submit" class="btn btn-primary">Dodaj listę</button>
+    </form>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nazwa listy</th>
+            <th>Opis</th>
+            <th>Data zakupów</th>
+            <th>Akcja</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="row-@item.Id" class="@(item.IsChecked ? "skreslony" : "")">
+                <td>@Html.DisplayFor(modelItem => item.ListName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@Html.DisplayFor(modelItem => item.ShoppingDate)</td>
+                <td>
+                    <form action="/Home/Details" method="get" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-info">Szczegóły</button>
+                    </form>
+
+                    <form action="/Home/Edit" method="get" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-warning">Edytuj</button>
+                    </form>
+
+                    <form class="toggle-list-status-form" method="post" action="/Home/ToggleListStatus" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-secondary">Skreśl listę</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".toggle-list-status-form").on("submit", function (event) {
+                event.preventDefault(); 
+
+                var form = $(this); 
+                var id = form.find('input[name="id"]').val(); 
+                var row = $("#row-" + id); 
+
+               
+                if (row.hasClass("skreslony")) {
+                    console.log("Lista z ID " + id + jest już skreślona i nie można jej przywrócić.");
+                        return;
+                }
+
+               
+                $.ajax({
+                    type: "POST",
+                    url: form.attr("action"), 
+                    data: form.serialize(), 
+                    success: function () {
+                        console.log("Status listy z ID " + id + został zmieniony.");
+                            row.addClass("skreslony"); 
+                    },
+                    error: function () {
+                        console.log("Wystąpił błąd podczas zmiany statusu listy z ID " + id);
+                    }
+                });
+            });
+        });
+    </script>
+
+}
+
+<style>
+    /* Styl dla skreślonych elementów */
+    .skreslony {
+        text-decoration: line-through;
+        color: gray;
+    }
+</style>
+
+
+
+
+

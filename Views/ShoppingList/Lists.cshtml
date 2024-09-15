@@ -1,0 +1,26 @@
+﻿@model IEnumerable<ShoppingListApp.Data.ShoppingListItem>
+
+@{
+    ViewData["Title"] = "All Shopping Lists";
+}
+
+<h1>All Shopping Lists</h1>
+
+<ul>
+    @foreach (var list in Model)
+    {
+        <li>
+            <a asp-action="Details" asp-route-id="@list.Id">@list.ListName</a>
+
+            
+            <form asp-action="Delete" method="post" style="display:inline;">
+                <input type="hidden" name="id" value="@list.Id" />
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    }
+</ul>
+
+
+<a asp-action="Create" class="btn btn-primary">Add another list</a>
+

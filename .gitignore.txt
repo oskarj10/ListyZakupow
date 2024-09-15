@@ -1,0 +1,8 @@
+<<<<<<< HEAD
+.vs/ShoppingListApp/FileContentIndex/*.vsidx
+.vs/
+
+=======
+﻿.vs/ShoppingListApp/FileContentIndex/*.vsidx
+.vs/
+>>>>>>> c5c5bca61b538260470d498270377da5d3f81c23
